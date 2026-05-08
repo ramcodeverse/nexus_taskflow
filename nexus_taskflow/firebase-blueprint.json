@@ -1,0 +1,199 @@
+{
+  "entities": {
+    "Profile": {
+      "title": "User Profile",
+      "description": "Public and private user profile data",
+      "type": "object",
+      "properties": {
+        "full_name": { "type": "string" },
+        "avatar_url": { "type": "string" },
+        "role": { "type": "string", "enum": ["admin", "member"] },
+        "created_at": { "type": "string", "format": "date-time" },
+        "updated_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["full_name", "role", "created_at", "updated_at"]
+    },
+    "Project": {
+      "title": "Project",
+      "description": "Software project or workspace",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "status": { "type": "string", "enum": ["active", "on-hold", "completed", "archived"] },
+        "priority": { "type": "string", "enum": ["low", "medium", "high", "urgent"] },
+        "color": { "type": "string" },
+        "deadline": { "type": ["string", "null"], "format": "date-time" },
+        "created_by": { "type": "string" },
+        "created_at": { "type": "string", "format": "date-time" },
+        "updated_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "status", "priority", "created_by", "created_at", "updated_at"]
+    },
+    "ProjectMember": {
+      "title": "Project Member",
+      "description": "Relational mapping of users to projects",
+      "type": "object",
+      "properties": {
+        "project_id": { "type": "string" },
+        "user_id": { "type": "string" },
+        "role": { "type": "string", "enum": ["admin", "member"] },
+        "joined_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["project_id", "user_id", "role", "joined_at"]
+    },
+    "Task": {
+      "title": "Task",
+      "description": "Individual work item within a project",
+      "type": "object",
+      "properties": {
+        "project_id": { "type": "string" },
+        "assignee_id": { "type": ["string", "null"] },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "status": { "type": "string", "enum": ["todo", "in-progress", "review", "completed"] },
+        "priority": { "type": "string", "enum": ["low", "medium", "high", "urgent"] },
+        "due_date": { "type": ["string", "null"], "format": "date-time" },
+        "position": { "type": "number" },
+        "created_by": { "type": "string" },
+        "created_at": { "type": "string", "format": "date-time" },
+        "updated_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["project_id", "title", "status", "priority", "position", "created_by", "created_at", "updated_at"]
+    },
+    "Comment": {
+      "title": "Comment",
+      "description": "User feedback on a task",
+      "type": "object",
+      "properties": {
+        "task_id": { "type": "string" },
+        "user_id": { "type": "string" },
+        "content": { "type": "string" },
+        "created_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["task_id", "user_id", "content", "created_at"]
+    },
+    "ActivityLog": {
+      "title": "Activity Log",
+      "description": "Audit trail of project events",
+      "type": "object",
+      "properties": {
+        "project_id": { "type": ["string", "null"] },
+        "user_id": { "type": "string" },
+        "action": { "type": "string" },
+        "entity_type": { "type": "string" },
+        "entity_id": { "type": ["string", "null"] },
+        "details": { "type": "object" },
+        "created_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["user_id", "action", "entity_type", "created_at"]
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "User specific alert",
+      "type": "object",
+      "properties": {
+        "user_id": { "type": "string" },
+        "title": { "type": "string" },
+        "message": { "type": "string" },
+        "type": { "type": "string", "enum": ["info", "success", "warning", "error"] },
+        "read": { "type": "boolean" },
+        "created_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["user_id", "title", "message", "type", "read", "created_at"]
+    },
+    "Team": {
+      "title": "Team",
+      "description": "A group of users with a shared workspace",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "slug": { "type": "string" },
+        "members": { "type": "array", "items": { "type": "string" } },
+        "invite": {
+          "type": "object",
+          "properties": {
+            "code": { "type": "string" },
+            "expires_at": { "type": "string", "format": "date-time" },
+            "created_at": { "type": "string", "format": "date-time" }
+          }
+        },
+        "team_lead_id": { "type": "string" },
+        "created_by": { "type": "string" },
+        "created_at": { "type": "string", "format": "date-time" },
+        "updated_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "slug", "members", "invite", "team_lead_id", "created_by", "created_at", "updated_at"]
+    },
+    "TeamMember": {
+      "title": "Team Member",
+      "description": "Relational mapping of users to teams",
+      "type": "object",
+      "properties": {
+        "team_id": { "type": "string" },
+        "user_id": { "type": "string" },
+        "role": { "type": "string", "enum": ["leader", "member"] },
+        "joined_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["team_id", "user_id", "role", "joined_at"]
+    },
+    "Invite": {
+      "title": "Team Invite",
+      "description": "Secure invite code for teams",
+      "type": "object",
+      "properties": {
+        "code": { "type": "string" },
+        "teamId": { "type": "string" },
+        "createdBy": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "expiresAt": { "type": "string", "format": "date-time" },
+        "uses": { "type": "number" },
+        "maxUses": { "type": "number" },
+        "active": { "type": "boolean" }
+      },
+      "required": ["code", "teamId", "createdBy", "createdAt", "expiresAt", "uses", "maxUses", "active"]
+    }
+  },
+  "firestore": {
+    "/profiles/{userId}": {
+      "schema": "Profile",
+      "description": "User profiles"
+    },
+    "/invites/{code}": {
+      "schema": "Invite",
+      "description": "Team invite codes"
+    },
+    "/teams/{teamId}": {
+      "schema": "Team",
+      "description": "Team documents"
+    },
+    "/teams/{teamId}/members/{memberId}": {
+      "schema": "TeamMember",
+      "description": "Team membership list"
+    },
+    "/projects/{projectId}": {
+      "schema": "Project",
+      "description": "Main project documents"
+    },
+    "/projects/{projectId}/members/{memberId}": {
+      "schema": "ProjectMember",
+      "description": "Project membership list"
+    },
+    "/projects/{projectId}/tasks/{taskId}": {
+      "schema": "Task",
+      "description": "Project tasks"
+    },
+    "/projects/{projectId}/tasks/{taskId}/comments/{commentId}": {
+      "schema": "Comment",
+      "description": "Task comments"
+    },
+    "/projects/{projectId}/activity/{activityId}": {
+      "schema": "ActivityLog",
+      "description": "Project audit trail"
+    },
+    "/notifications/{notificationId}": {
+      "schema": "Notification",
+      "description": "System notifications"
+    }
+  }
+}
