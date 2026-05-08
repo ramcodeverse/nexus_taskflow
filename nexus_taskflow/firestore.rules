@@ -1,0 +1,214 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Helpers ---
+    function isSignedIn() { return request.auth != null; }
+    function isAdmin() { 
+      return isSignedIn() && (
+        (request.auth.token.email == 'ramcodeverse@gmail.com') ||
+        (exists(/databases/$(database)/documents/profiles/$(request.auth.uid)) && get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data.role == 'admin')
+      );
+    }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    
+    // Auth-based helpers
+    function isOwner(userId) { return isSignedIn() && (request.auth.uid == userId || isAdmin()); }
+    
+    // Project helpers
+    function getMember(projectId) {
+      return get(/databases/$(database)/documents/projects/$(projectId)/members/$(request.auth.uid));
+    }
+    function isProjectMember(projectId) {
+      return isSignedIn() && (
+        exists(/databases/$(database)/documents/projects/$(projectId)/members/$(request.auth.uid)) || 
+        (resource != null && resource.data.members is list && request.auth.uid in resource.data.members) ||
+        isAdmin()
+      );
+    }
+    function isProjectAdmin(projectId) {
+      return isProjectMember(projectId) && (getMember(projectId).data.role == 'admin' || isAdmin());
+    }
+
+    // Team helpers
+    function isTeamMember(teamId) {
+      return isSignedIn() && (
+        exists(/databases/$(database)/documents/teams/$(teamId)/members/$(request.auth.uid)) || 
+        (resource != null && resource.data.members is list && request.auth.uid in resource.data.members) ||
+        isAdmin()
+      );
+    }
+    function isTeamLeader(teamId) {
+      return isTeamMember(teamId) && (get(/databases/$(database)/documents/teams/$(teamId)/members/$(request.auth.uid)).data.role == 'leader' || isAdmin());
+    }
+
+    // --- Rules ---
+
+    // 0.1 Invites (Backend Only Secure Access)
+    match /invites/{code} {
+      allow read, write: if false; // Only accessible via Firebase Admin (Server)
+    }
+
+    // 0.2 Recursive Membership (For collectionGroup queries)
+    match /{document=**}/members/{memberId} {
+      allow read: if isSignedIn();
+    }
+
+    // 1. Profiles
+    match /profiles/{userId} {
+      function isValidProfile(data) {
+        return data.keys().hasAll(['full_name', 'avatar_url', 'role', 'created_at', 'updated_at']) &&
+               data.full_name is string && data.full_name.size() <= 100 &&
+               data.avatar_url is string && data.avatar_url.size() <= 1000 &&
+               data.role in ['admin', 'member'] &&
+               data.created_at is timestamp &&
+               data.updated_at is timestamp;
+      }
+
+      allow get: if isSignedIn();
+      allow list: if isSignedIn(); // Allow listing profiles for team building/mentions
+      
+      allow create: if isOwner(userId) && 
+                      isValidId(userId) && 
+                      isValidProfile(incoming()) && 
+                      incoming().role == 'member' && // New users default to member
+                      incoming().created_at == request.time &&
+                      incoming().updated_at == request.time;
+                      
+      allow update: if isOwner(userId) && 
+                      isValidProfile(incoming()) &&
+                      incoming().created_at == existing().created_at &&
+                      incoming().updated_at == request.time &&
+                      // Member cannot change their own role to admin
+                      (incoming().role == existing().role || (existing().role == 'admin') || isAdmin());
+    }
+
+    // 1.1 Teams
+    match /teams/{teamId} {
+      function isValidTeam(data) {
+        return data.keys().hasAll(['name', 'slug', 'team_lead_id', 'created_by', 'created_at', 'updated_at', 'invite']) &&
+               data.name is string && data.name.size() <= 100 &&
+               data.slug is string &&
+               data.team_lead_id is string &&
+               data.created_by is string &&
+               data.created_at is timestamp &&
+               data.updated_at is timestamp;
+      }
+
+      allow get: if isSignedIn();
+      allow list: if isSignedIn(); 
+      
+      allow create: if isSignedIn() && isValidId(teamId) && isValidTeam(incoming()) && incoming().created_by == request.auth.uid;
+      allow update, delete: if isTeamLeader(teamId);
+
+      match /members/{memberId} {
+        allow read: if isSignedIn();
+        allow create: if isSignedIn() && (
+          isTeamLeader(teamId) || // Leaders can add members
+          (isValidId(memberId) && memberId == request.auth.uid) // Anyone can join if they have the code logic (handled by server, but client needs to write this too)
+        );
+        allow update, delete: if isTeamLeader(teamId) || (memberId == request.auth.uid);
+      }
+    }
+
+    // 2. Projects
+    match /projects/{projectId} {
+      function isValidProject(data) {
+        return data.keys().hasAll(['title', 'description', 'status', 'priority', 'color', 'deadline', 'members', 'created_by', 'created_at', 'updated_at']) &&
+               data.title is string && data.title.size() <= 200 &&
+               data.description is string && data.description.size() <= 2000 &&
+               data.status in ['active', 'on-hold', 'completed', 'archived'] &&
+               data.priority in ['low', 'medium', 'high', 'urgent'] &&
+               data.color is string && data.color.size() <= 20 &&
+               (data.deadline == null || data.deadline is timestamp) &&
+               data.members is list &&
+               data.created_by is string &&
+               data.created_at is timestamp &&
+               data.updated_at is timestamp;
+      }
+
+      allow get: if isProjectMember(projectId);
+      allow list: if isSignedIn(); 
+      
+      allow create: if isSignedIn() && 
+                      isValidId(projectId) && 
+                      isValidProject(incoming()) &&
+                      incoming().members.size() > 0 &&
+                      incoming().created_by == request.auth.uid &&
+                      incoming().created_at == request.time &&
+                      incoming().updated_at == request.time;
+
+      allow update: if isProjectAdmin(projectId) && 
+                      isValidProject(incoming()) &&
+                      incoming().created_by == existing().created_by &&
+                      incoming().created_at == existing().created_at &&
+                      incoming().updated_at == request.time;
+
+      allow delete: if isProjectAdmin(projectId);
+
+      // Sub-collections
+      match /members/{memberId} {
+        allow read: if isProjectMember(projectId);
+        allow write: if isProjectAdmin(projectId) && isValidId(memberId);
+      }
+
+      match /tasks/{taskId} {
+        function isValidTask(data) {
+          return data.keys().hasAll(['project_id', 'assignee_id', 'title', 'description', 'status', 'priority', 'due_date', 'position', 'created_by', 'created_at', 'updated_at']) &&
+                 data.keys().size() == 11 &&
+                 data.project_id == projectId &&
+                 (data.assignee_id == null || data.assignee_id is string) &&
+                 data.title is string && data.title.size() <= 500 &&
+                 data.description is string && data.description.size() <= 5000 &&
+                 data.status in ['todo', 'in-progress', 'review', 'completed'] &&
+                 data.priority in ['low', 'medium', 'high', 'urgent'] &&
+                 (data.due_date == null || data.due_date is timestamp) &&
+                 data.position is number &&
+                 data.created_by is string &&
+                 data.created_at is timestamp &&
+                 data.updated_at is timestamp;
+        }
+
+        allow read: if isProjectMember(projectId);
+        allow create: if isProjectMember(projectId) && 
+                        isValidId(taskId) && 
+                        isValidTask(incoming()) &&
+                        incoming().created_by == request.auth.uid &&
+                        incoming().created_at == request.time &&
+                        incoming().updated_at == request.time;
+        
+        allow update: if isProjectMember(projectId) && 
+                        isValidTask(incoming()) &&
+                        incoming().created_by == existing().created_by &&
+                        incoming().created_at == existing().created_at &&
+                        incoming().updated_at == request.time &&
+                        // If task is completed, only admin can rename or change project
+                        (existing().status != 'completed' || isProjectAdmin(projectId) || (incoming().status != existing().status && incoming().diff(existing()).affectedKeys().hasOnly(['status', 'updated_at'])));
+
+        allow delete: if isProjectAdmin(projectId);
+
+        match /comments/{commentId} {
+          allow read: if isProjectMember(projectId);
+          allow create: if isProjectMember(projectId) && isValidId(commentId) && incoming().user_id == request.auth.uid;
+        }
+      }
+
+      match /activity/{activityId} {
+        allow read: if isProjectMember(projectId);
+        allow create: if isProjectMember(projectId); // Only allow creation of activity logs by members
+      }
+    }
+
+    // 3. Notifications
+    match /notifications/{notificationId} {
+      allow read, update, delete: if isOwner(existing().user_id);
+      allow create: if false; // System-only or Cloud Function only
+    }
+  }
+}
