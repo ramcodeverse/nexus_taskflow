@@ -232,8 +232,7 @@ Please read [CONTRIBUTING.md](./CONTRIBUTING.md) for detailed guidelines.
 <br>
 
 **Ramcodeverse** • 
-[Portfolio](https://ramcodeverse.com) • 
-[Twitter](https://x.com/ramcodeverse)
+[Portfolio][(https://ramcodeverse.com](https://rams-portfolio-site.netlify.app/)) • 
 
 </div>
 ```
