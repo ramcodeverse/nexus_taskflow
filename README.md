@@ -14,8 +14,11 @@ SaaS startups MVP
 Internal company productivity tools
 AI-powered workflow systems
 Portfolio-grade full-stack applications
+
 ⚡ Key Features
+
 📌 Smart Task Management
+
 Create, update, and delete tasks in real time
 Status tracking: Todo → In Progress → Completed
 Priority levels (Low / Medium / High / Critical)
@@ -40,20 +43,11 @@ Productivity insights
 Daily / weekly progress tracking
 🛠️ Tech Stack
 Frontend
-React.js / Next.js
-Tailwind CSS
-Framer Motion (smooth UI animations)
-Zustand / Redux (state management)
-Backend
-Node.js + Express
-Firebase / MongoDB (depending on setup)
-REST / WebSocket support for real-time sync
-Auth & Security
+React.js / Next.js,Tailwind CSS
+Framer Motion (smooth UI animations),Zustand / Redux (state management)
+Backend ,Node.js + Express ,Firebase / MongoDB (depending on setup),REST / WebSocket support for real-time sync,Auth & Security
 Firebase Auth / JWT
-Protected routes
-Role-based authorization
-Deployment
-Railway / Vercel / Firebase Hosting
+Protected routes,Role-based authorization,Deployment Railway 
 🧱 Architecture
 Frontend (React)
    ↓
