@@ -140,9 +140,8 @@ service cloud.firestore {
                       isValidId(projectId) && 
                       isValidProject(incoming()) &&
                       incoming().members.size() > 0 &&
-                      incoming().created_by == request.auth.uid &&
-                      incoming().created_at == request.time &&
-                      incoming().updated_at == request.time;
+                      incoming().created_by == request.auth.uid;
+
 
       allow update: if isProjectAdmin(projectId) && 
                       isValidProject(incoming()) &&
