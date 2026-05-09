@@ -1,7 +1,4 @@
-I've enhanced your Nexus TaskFlow README with better structure, fixed broken formatting, improved visual hierarchy, and added clarity throughout while preserving all original content.
-
-```markdown
-# 🚀 **Nexus TaskFlow**
+ 🚀 **Nexus TaskFlow**
 *Real-time Task Management & AI-Powered Workflow Automation*
 
 <div align="center">
