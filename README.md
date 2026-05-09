@@ -1,13 +1,13 @@
- 🚀 **Nexus TaskFlow**
+🚀 **Nexus TaskFlow**
 *Real-time Task Management & AI-Powered Workflow Automation*
 
 <div align="center">
   
-[![Next.js](https://img.shields.io/badge/Next.js-14-%23000000.svg?logo=next.js&logoColor=white)](https://nextjs.org/)
+[![Vite](https://img.shields.io/badge/Vite-5-646CFF.svg?logo=vite&logoColor=white)](https://vitejs.dev/)
 [![React](https://img.shields.io/badge/React-18-%2320232a.svg?logo=react&logoColor=%2361DAFB)](https://reactjs.org/)
-[![TailwindCSS](https://img.shields.io/badge/TailwindCSS-38B2AC.svg?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
-[![Node.js](https://img.shields.io/badge/Node.js-18+-43853D.svg?logo=node.js&logoColor=white)](https://nodejs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6.svg?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Firebase](https://img.shields.io/badge/Firebase-FFCA28.svg?logo=firebase&logoColor=black)](https://firebase.google.com/)
+[![Express](https://img.shields.io/badge/Express.js-000000.svg?logo=express&logoColor=white)](https://expressjs.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![GitHub stars](https://img.shields.io/github/stars/ramcodeverse/nexus_taskflow?style=social)](https://github.com/ramcodeverse/nexus_taskflow)
 
@@ -24,12 +24,12 @@
 
 | Feature | Technology |
 |---------|-------------|
-| 🎨 **Beautiful UI** | Framer Motion animations + Tailwind CSS + shadcn/ui |
-| ⚡ **Fast Performance** | Next.js 14 SSR + Code splitting + Zustand state |
-| 🔄 **Real-time Collaboration** | WebSocket sync + Firebase listeners + Multiplayer updates |
+| 🎨 **Beautiful UI** | Framer Motion animations + CSS Modules / Tailwind |
+| ⚡ **Fast Performance** | Vite + React 18 + Zustand state |
+| 🔄 **Real-time Collaboration** | Firestore listeners + WebSocket (Express) + Multiplayer updates |
 | 🤖 **AI-Ready** | OpenAI/Gemini hooks + Event-driven automation + Plugin system |
 | 📱 **Mobile Responsive** | Fully adaptive design + Touch interactions |
-| 🔒 **Enterprise Security** | Role-based access + Secure authentication |
+| 🔒 **Enterprise Security** | Role-based access + Secure authentication (Firebase Auth) |
 
 ---
 
@@ -46,14 +46,16 @@ npm install
 # 3. Configure environment
 cp .env.example .env.local
 
-# 4. Add your API keys (Firebase + Gemini)
+# 4. Add your API keys (Firebase + Gemini/OpenAI)
 # See .env.example for required format
 
-# 5. Launch development servers
-npm run dev:full
+# 5. Start development (frontend + backend concurrently)
+npm run dev:full   # or `npm run dev` (frontend only) + `npm run server` (backend)
 ```
 
-✅ **Done!** Open [http://localhost:3000](http://localhost:3000)
+✅ **Done!** Open [http://localhost:5173](http://localhost:5173) (Vite default)
+
+> 📘 The backend API runs on `http://localhost:3001` (configurable).
 
 ---
 
@@ -63,19 +65,19 @@ npm run dev:full
 ```
 Todo ➜ In Progress ➜ Review ➜ Done
 ```
-- ✨ Live updates across all users  
-- 🎯 Priority levels + Due dates + Custom labels  
-- 📱 Drag & drop reordering  
-- 🔍 Full-text search with filters  
+- ✨ Live updates across all users (Firestore snapshot listeners)
+- 🎯 Priority levels + Due dates + Custom labels
+- 📱 Drag & drop reordering
+- 🔍 Full-text search with filters
 
 ### 2. **Team Collaboration**
 ```
 👑 Admin | 👤 Member | 👀 Guest
 ```
-- 💬 In-task comments & threads  
-- 🔔 @mentions & real-time notifications  
-- 📊 Shared team dashboards  
-- 🔐 Granular role-based permissions  
+- 💬 In-task comments & threads
+- 🔔 @mentions & real-time notifications
+- 📊 Shared team dashboards
+- 🔐 Granular role-based permissions (Firebase Security Rules)
 
 ### 3. **AI Superpowers (Plug & Play)**
 
@@ -104,10 +106,10 @@ await ai.search("What did John work on last week?");
 
 ```mermaid
 graph TB
-    A[Next.js Frontend] --> B[Express API]
+    A[React + Vite Frontend] --> B[Express API Server]
     B --> C[Firebase Firestore]
-    B --> D[WebSocket Server]
-    A -.->|Real-time| D
+    B --> D[Firebase Auth]
+    A -.->|Real-time| C
     E[AI Services] --> B
     F[Analytics Engine] --> B
 ```
@@ -119,9 +121,10 @@ graph TB
 ```javascript
 // Frontend
 const frontend = {
-  framework: "Next.js 14 + React 18",
-  language: "TypeScript",
-  styling: "Tailwind CSS + Framer Motion",
+  buildTool: "Vite 5",
+  framework: "React 18",
+  language: "TypeScript 5",
+  styling: "CSS Modules / Tailwind CSS",
   state: "Zustand"
 };
 
@@ -129,36 +132,51 @@ const frontend = {
 const backend = {
   runtime: "Node.js + Express",
   database: "Firebase Firestore",
-  realtime: "Socket.io",
+  auth: "Firebase Authentication",
+  realtime: "Firestore listeners + Express WebSocket",
   validation: "Zod"
 };
 
-// DevOps
-const devops = {
-  hosting: "Vercel + Railway",
+// Infrastructure
+const infra = {
+  hosting: "Railway / Vercel (frontend) + Railway (backend)",
   ci_cd: "GitHub Actions",
-  testing: "Vitest + Playwright",
-  container: "Docker"
+  security: "Firestore Security Rules + security_spec.md",
+  testing: "Vitest + firestore.rules.test.ts"
 };
 ```
 
 ---
 
-## 📁 **Project Structure**
+## 📁 **Project Structure** (Actual)
 
 ```
 nexus_taskflow/
-├── 📱 src/                 # Next.js frontend application
-│   ├── components/         # Reusable UI components
-│   ├── pages/              # Route pages (App Router)
-│   ├── hooks/              # Custom React hooks
-│   └── store/              # Zustand state management
-├── 🖥️ backend/             # Express API server
-│   ├── routes/             # API endpoints
-│   ├── controllers/        # Business logic
-│   └── middleware/         # Auth & validation
-├── 📄 .env.example         # Environment template
-└── 🐳 docker-compose.yml   # Container orchestration
+├── 📁 src/                    # React frontend source
+│   ├── components/            # Reusable UI components
+│   ├── pages/                 # Page views
+│   ├── hooks/                 # Custom React hooks
+│   ├── store/                 # Zustand state stores
+│   └── main.tsx               # Vite entry point
+├── 🖥️ server.ts               # Express backend API
+├── 📄 index.html              # Vite HTML template
+├── ⚙️ vite.config.ts          # Vite configuration
+├── 🔧 tsconfig.json           # TypeScript config
+├── 📦 package.json            # Dependencies & scripts
+├── 🔐 .env.example            # Environment variables template
+├── 🧯 firestore.rules         # Firestore security rules
+├── ✅ firestore.rules.test.ts # Security rules tests
+├── 📋 firebase-applet-config.json  # Firebase Applet config
+├── 📋 firebase-blueprint.json      # Firebase deployment blueprint
+├── 📜 security_spec.md        # Detailed security specification
+├── 📜 AGENTS.md               # AI agent guidelines
+├── 📜 TODO.md                 # Development roadmap
+├── 📜 metadata.json           # Project metadata
+├── 🚫 .gitignore
+├── 📄 Procfile                # Heroku/Railway process definition
+├── 📜 LICENSE
+├── 📖 README.md               # You are here
+└── 🔧 eslint.config.js        # ESLint rules
 ```
 
 ---
@@ -166,29 +184,36 @@ nexus_taskflow/
 ## 🎪 **Live Demo**
 
 <div align="center">
-  <a href="https://nexus-taskflow.vercel.app">
+  <a href="https://taskflow-app-production-e8c8.up.railway.app">
     <strong>🔗 Try the Live Demo →</strong>
   </a>
 </div>
+
+> Demo account: `demo@nexus.com` / `demo123` (or register a new account)
 
 ---
 
 ## ⚡ **Deploy to Production**
 
-### Frontend (Vercel)
+### Frontend (Vite static hosting)
 ```bash
-vercel --prod
+npm run build   # outputs to dist/
+# Deploy dist/ to Netlify, Vercel, or any static host
 ```
 
-### Backend (Railway)
+### Backend (Express on Railway/Heroku)
 ```bash
-railway login && railway up
+# Railway: connect your repo, set environment vars
+# Heroku: git push heroku main
 ```
 
-### Docker (Full Stack)
+### Full stack with PM2 (self-managed)
 ```bash
-docker-compose up -d
+npm run build
+pm2 start server.ts --interpreter node --watch
 ```
+
+> 🔒 **Important**: Set `FIREBASE_ADMIN_KEY`, `VITE_FIREBASE_CONFIG`, `OPENAI_API_KEY` in production environment.
 
 ---
 
@@ -196,11 +221,11 @@ docker-compose up -d
 
 | Status | Feature |
 |--------|---------|
-| ✅ **Done** | Real-time collaboration & RBAC auth |
+| ✅ **Done** | Real-time collaboration & RBAC auth (Firestore + Rules) |
 | ✅ **Done** | Kanban board with drag & drop |
 | 🔄 **Now** | AI task generation & smart prioritization |
 | 📋 **Next** | Mobile app (React Native) |
-| 📋 **Next** | Slack bot integration |
+| 📋 **Next** | Slack / Discord bot integration |
 
 ---
 
@@ -209,13 +234,14 @@ docker-compose up -d
 We welcome contributions! Here's how to get started:
 
 ```bash
-npm run dev     # Start development server
-npm run test    # Run test suite
-npm run lint    # Check code quality
-npm run build   # Create production build
+npm run dev        # Start dev server (frontend only)
+npm run server     # Start Express backend
+npm run test       # Run unit & Firestore rules tests
+npm run lint       # Check code quality
+npm run build      # Create production build (frontend)
 ```
 
-Please read [CONTRIBUTING.md](./CONTRIBUTING.md) for detailed guidelines.
+Please read [AGENTS.md](./AGENTS.md) for contribution guidelines.
 
 ---
 
@@ -232,19 +258,8 @@ Please read [CONTRIBUTING.md](./CONTRIBUTING.md) for detailed guidelines.
 <br>
 
 **Ramcodeverse** • 
-[Portfolio][(https://ramcodeverse.com](https://rams-portfolio-site.netlify.app/)) • 
+[Portfolio](https://rams-portfolio-site.netlify.app/) • 
+[GitHub](https://github.com/ramcodeverse)
 
 </div>
 ```
-
-## Key Improvements Made
-
-1. **Fixed formatting** – Cleaned up broken lines, inconsistent spacing, and malformed bullet points
-2. **Added tables** – Better visual organization for features, roadmap, and tech comparisons
-3. **Enhanced code blocks** – Proper syntax highlighting with language specifiers
-4. **Improved hierarchy** – Clear heading structure with consistent emoji usage
-5. **Better readability** – Separated sections with horizontal rules and proper spacing
-6. **Preserved all content** – Kept every feature, stat, and link from the original
-7. **Professional touch** – Added "Get Started" callout, structured contribution section, and polished footers
-
-The README is now production-ready, scannable, and visually appealing for GitHub or any documentation platform.
